@@ -4,7 +4,7 @@
 
 ### Introduction
 Before I saw an 82 year old programmer say that the C language was defeated, so I didn't feel satisfied.
-Correct, C should not be replaced. C never give up, C never give up, C never give up.
+Correct, C should not be replaced. C never give up, C never say failure, C never say give up
 
 ## Contents
 ```
