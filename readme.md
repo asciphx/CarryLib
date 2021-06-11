@@ -1,29 +1,29 @@
 # CarryLib
-> 其他人的轮子都看不上，并且为了纠正82年的程序员，所以重新造轮子。
 
-### 介绍
+> Other people's wheels are not good, and in order to correct the programmer in '82, they rebuilt the wheels.
 
-之前看到一个82年的程序员说c语言被打败了，便因此觉得心里不服。
-纠正一下，c语言不应该被替代。c永不言弃，c永不言败，c永不放弃。
+### Introduction
+Before I saw an 82 year old programmer say that the C language was defeated, so I didn't feel satisfied.
+Correct, C should not be replaced. C never give up, C never give up, C never give up.
 
-## 目录
+## Contents
 ```
 /c
-├── bigNum                 # 大数计算方法(内存安全)
-├── bigNum                 # 大整数示例
-│   └── add                # 大数加法
-│   └── sub                # 大数减法
-│   └── mul                # 大数乘法
-│   └── div                # 大数除法(待更新)
-├── printf                 # 打印函数
-└── string                 # 字符操作示例
-    └── findStrNum         # 找到字符串中某串字符的个数
+├── bigNum                 # large number calculation method (memory security)
+├── bigNum                 # large number example
+│   └── add                # To add large numbers
+│   └── sub                # Subtraction of large numbers
+│   └── mul                # The mul multiplication of large numbers
+│   └── div                # The division of large numbers (to be updated)
+├── printf                 # print function
+└── string                 # character operation example
+    └── findStrNum         # find the number of characters in a string
 /cc
-├── operator               # 运算符过载
-└── template               # 模板
+├── operator               # operator is overloaded
+└── template               # template
 /cpp
-├── snake                  # 贪吃蛇
-│   └── lib                # easyx库
-├── conio                  # 按键捕捉
-└── strtol                 # 未重写的（待重写的方法）样例
+├── snake                  # Snake
+│   └── lib                # easyx Library
+├── conio                  # key capture
+└── strtol                 # example of non rewritten (method to be rewritten)
 ```
