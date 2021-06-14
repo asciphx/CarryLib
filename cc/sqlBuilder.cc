@@ -21,14 +21,6 @@ string formattedString(const char *f,...){
   }
   va_end(vl); return s;
 }
-template<typename T>
-const char* getObjectName(){
-  const char*name=typeid(T).name();int i=0;
-  while (*++name);while (*--name!=0x20)++i;
-  char*c=(char*)malloc(sizeof(char)*(i+1));
-  i=0;while (*++name)c[i++]=*name;c[i]=0;
-  return c;
-}
 enum class Sort{ ASC,DESC };
 template<typename T>class Sql{
   public:
@@ -57,10 +49,18 @@ template<typename T>inline Sql<T>&Sql<T>::field(vector<string>&arr){
 template<typename T>inline Sql<T>&Sql<T>::field(const string*arr,int l){field_="";
   for (unsigned int i=0;i<l;++i){ if (i==l-1)field_+=arr[i];else field_+=arr[i]+","; }return *this;
 }
+template<typename T>
+char* getObjectName(){
+  const char*name=typeid(T).name();int i=0;
+  while (*++name);while (*--name!=0x20)++i;
+  char*c=(char*)malloc(sizeof(char)*(i+1));
+  i=0;while (*++name)c[i++]=*name;c[i]=0;
+  return c;
+}
 template<typename T>inline string Sql<T>::findAll()noexcept(false){
   string sql=client_+field_+" from ";
-  sql+=getObjectName<T>();
-  sql+=orderBy_;
+  char*name=getObjectName<T>();
+  sql+=name;free(name);sql+=orderBy_;
   if (offset_>0){ sql+=" limit "+to_string(limit_)+","+to_string(offset_); }
   return sql;
 }
