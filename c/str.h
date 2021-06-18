@@ -18,6 +18,10 @@ int find1CharPosASC(const char*c,const char d){
   for(int l=strLen(c),i=0;i<l;++i)if(c[i]==d)return i;
 }
 //other
+char*I2C(int d){
+  char*j=(char*)calloc(11,sizeof(char));int i=0;
+  while(d){j[i++]=d%10+0x30;d/=10;}j[i]=0;return j;
+}
 char*subStr(const char*c,int i,int e){if(e<i||i<0)return (char *)0;
   char*w=(char*)malloc(sizeof(char)*(e-i+1));int p=0;while(i<e)w[p++]=c[i++]; w[p]=0;return w;
 }
