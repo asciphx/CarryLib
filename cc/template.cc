@@ -1,18 +1,16 @@
 #include <string>
 #include <iostream>
 using namespace std;
-// template <typename... Args>
-template <typename T>
-void Print(T value){
-  cout<<value<<endl;
-}
 template <typename T,int N>
 class Array{private:T arr[N];
 public:int Size()const{return N;}};
+template <typename T> void print(T& x) { std::cout << x << std::endl; }
+template <typename S, typename... Args>
+void print(S s, Args... a) { std::cout << s; print<Args...>(a...); }
+
 int main(){
-  Print<int>(55);Print(5.5f);
-  Print<string>("dsgs");
   Array<int,5>arr;
-  Print(arr.Size());
+  print(arr.Size());
   cin.get();
+  print(1, " dsag ", 1.5f, " ", 3.14);
 }
