@@ -5,8 +5,8 @@ template <typename T,int N>
 class Array{private:T arr[N];
 public:int Size()const{return N;}};
 template <typename T> void print(T& x) { std::cout << x << std::endl; }
-template <typename S, typename... Args>
-void print(S s, Args... a) { std::cout << s; print<Args...>(a...); }
+template <typename T, typename... Args>
+void print(T s, Args... a) { std::cout << s; print<Args...>(a...); }
 
 int main(){
   Array<int,5>arr;

@@ -1,50 +1,36 @@
+#include <typeinfo>
 #include <iostream>
-#include <type_traits>
 #include <vector>
 using namespace std;
-template<typename T> char* getObjectName() {
-  const char* s = typeid(T).name(); int i = 1;
-  while (*++s); while (*--s != 0x20)++i;
-  char* c = (char*)malloc(sizeof(char) * i);
-  i = 0; while (*++s)c[i++] = *s; c[i] = 0; return c;
-}
-template <class N> constexpr const N& __(N*) {}
-#define T_(N) { #N, typeid(__(&this->N)).name(), sizeof(&this->N) }
-struct _proto_ { const char* name; const char* type; uint16_t size; };
-typedef vector<_proto_> _;//serialization
-template <class N, class T> _proto_ getConstructor(T& a, uint16_t i) {
+struct _proto_ { const char* name; const char* type; size_t offset; };
+typedef vector<_proto_> __;//serialization
+#define F_(T, N) { #N, typeid(N).name(),(size_t)(&reinterpret_cast<char const volatile&>(((T*)0)->N))  }
+template <class N, class T> _proto_ getConstructor(T& a, size_t i) {
   if (i >= a.$.size())i = a.$.size() - 1; return a.$[i];
 }
-template <class N, class T>constexpr N& getIdex(T& a, uint16_t i) {
-  if (i >= a.$.size())i = a.$.size() - 1; uint16_t r = 0;
-  for (uint8_t l = 0; l < i; ++l) r += a.$[l].size;
-  return *reinterpret_cast<N*>(reinterpret_cast<char*>(&a) + r);
+template <class N, class T> N& getIdex(T& a, size_t i) {
+  if (i >= a.$.size())i = a.$.size() - 1;
+  return *reinterpret_cast<N*>(reinterpret_cast<char*>(&a) + a.$[i].offset);
 }
 struct S {
-  S() {} S(float a, int b, char* c) : a(a), b(b), c(c) { }
+  using _ = S;
   float a;
-  int b;
+  string b;
   char* c;
-
-  _ ${ T_(a), T_(b), T_(c) };
-};
-struct Employee {
-  string name;//basic_string
-  double id;
-  float age;
-  S s;
-
-  _ ${ T_(name),T_(id),T_(age),T_(s) };
+  int d;
+  S(float a, string b, char* c, int d) : a(a), b(b), c(c), d(d) {}
+  __ ${ F_(_, a),F_(_, b) ,F_(_, c) ,F_(_, d) };
 };
 int main() {
-  char* sss = std::move(getObjectName<Employee>());
-  S s{ 1.4f, 2, "hello" };
-  cout << sss << endl;
-  Employee ee; for (auto& m : ee.$)cout << m.name << " " << m.type << endl;
-  _proto_ c = getConstructor<S>(s, 2);
-  cout << c.type << " || " << endl;
-  cout << getIdex<float>(s, 0) << endl;
-  cout << getIdex<int>(s, 1) << endl;
-  cout << getIdex<char*>(s, 2) << endl << endl;
-  return 0;
+  S s{ 1.3f, "world", "hello", 8 };
+  for (auto& m : s.$)
+    cout << m.name << " " << m.type << " " << m.offset << endl;
+  cout << endl << getIdex<float>(s, 0) << endl;
+  cout << getIdex<string>(s, 1) << endl;
+  cout << getIdex<char*>(s, 2) << endl;
+  _proto_ c = getConstructor<S>(s, 0);
+  cout << c.name << endl;
+  getIdex<float>(s, 0) = 3.0f;
+  const type_info* nInfo = &typeid(S);
+  cout << nInfo->name() << endl;
 }
