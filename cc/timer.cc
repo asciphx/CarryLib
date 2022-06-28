@@ -7,7 +7,7 @@ struct Timer {
   template<typename F> void setInterval(F func, uint32_t milliseconds);
   template<typename F> void setTimeoutSec(F func, uint32_t seconds);
   template<typename F> void setIntervalSec(F func, uint32_t seconds);
-  void stop();
+  inline void stop();
 private: std::atomic<bool> alive{ true };
 };
 template<typename F> void Timer::setTimeout(F func, uint32_t milliseconds) {
@@ -45,11 +45,10 @@ template<typename F> void Timer::setIntervalSec(F func, uint32_t seconds) {
 void Timer::stop() { alive = false; }
 int main() {
 using namespace std;
-  std::locale::global(std::locale("en_US.UTF8"));
   Timer t; int i = 0; bool run = true;
-  t.setTimeout([&t, &run]() {
+  t.setTimeout([&run]() {
 	cout << "经过6.18s" << endl;
-	t.stop(); run = false;
+	run = false;
 	}, 6180);
   t.setInterval([&i]() {
 	cout << "持续" << ++i << "秒" << endl;

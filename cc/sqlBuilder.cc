@@ -49,7 +49,7 @@ template<typename T>inline Sql<T>&Sql<T>::field(vector<string>&arr){
 template<typename T>inline Sql<T>&Sql<T>::field(const string*arr,int l){field_="";
   for (unsigned int i=0;i<l;++i){ if (i==l-1)field_+=arr[i];else field_+=arr[i]+","; }return *this;
 }
-template<typename T> const char* getObjectName() {
+template<typename T> const char* ObjName() {
   const char* s = typeid(T).name();
 #if _WIN32
   while (*++s != 0x20); return ++s;
@@ -59,8 +59,7 @@ template<typename T> const char* getObjectName() {
 }
 template<typename T>inline string Sql<T>::findAll()noexcept(false){
   string sql=client_+field_+" from ";
-  char*name=getObjectName<T>();
-  sql+=name;free(name);sql+=orderBy_;
+  sql+= ObjName<T>();sql+=orderBy_;
   if (offset_>0){ sql+=" limit "+to_string(limit_)+","+to_string(offset_); }
   return sql;
 }
