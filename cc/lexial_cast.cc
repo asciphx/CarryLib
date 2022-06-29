@@ -3,36 +3,36 @@
 #include <string_view>
 #include <stdexcept>
 namespace std {
-  template <typename T> inline T lexical_cast(const char* c);
-  template <typename T> inline typename std::enable_if<std::is_fundamental<T>::value, std::string>::type lexical_cast(T&& t);
+#if defined(_MSC_VER)
+#define _INLINE __forceinline
+#else
+#define _INLINE inline
+#endif 
+  template <typename T> _INLINE T lexical_cast(const char* c);
   template <typename S, typename T>
-  inline typename std::enable_if<std::is_fundamental<std::decay_t<T>>::value&&
+  _INLINE typename std::enable_if<std::is_fundamental<std::decay_t<T>>::value&&
 	std::is_same<S, std::string>::value, std::string>::type lexical_cast(T&& t);
-  template <typename S> inline S lexical_cast(std::string_view t);
-  template <> inline std::string lexical_cast<std::string>(const char* c);
-  template <> [[nodiscard]] inline bool lexical_cast<bool>(const char* c);
-  template <> [[nodiscard]] inline signed char lexical_cast<signed char>(const char* c);
-  template <> [[nodiscard]] inline unsigned char lexical_cast<unsigned char>(const char* c);
-  template <> [[nodiscard]] inline short lexical_cast<short>(const char* c);
-  template <> [[nodiscard]] inline unsigned short lexical_cast<unsigned short>(const char* c);
-  template <> [[nodiscard]] inline int lexical_cast<int>(const char* c);
-  template <> [[nodiscard]] inline unsigned int lexical_cast<unsigned int>(const char* c);
-  template <> [[nodiscard]] inline long long lexical_cast<long long>(const char* c);
-  template <> [[nodiscard]] inline unsigned long long lexical_cast<unsigned long long>(const char* c);
-  template <> [[nodiscard]] inline float lexical_cast<float>(const char* c);
-  template <> [[nodiscard]] inline double lexical_cast<double>(const char* c);
-  template <> [[nodiscard]] inline long double lexical_cast<long double>(const char* c);
-  template <> inline tm lexical_cast<tm>(const char* c);
+  template <typename S> _INLINE S lexical_cast(std::string_view t);
+  template <> _INLINE std::string lexical_cast<std::string>(const char* c);
+  template <> [[nodiscard]] _INLINE bool lexical_cast<bool>(const char* c);
+  template <> [[nodiscard]] _INLINE signed char lexical_cast<signed char>(const char* c);
+  template <> [[nodiscard]] _INLINE unsigned char lexical_cast<unsigned char>(const char* c);
+  template <> [[nodiscard]] _INLINE short lexical_cast<short>(const char* c);
+  template <> [[nodiscard]] _INLINE unsigned short lexical_cast<unsigned short>(const char* c);
+  template <> [[nodiscard]] _INLINE int lexical_cast<int>(const char* c);
+  template <> [[nodiscard]] _INLINE unsigned int lexical_cast<unsigned int>(const char* c);
+  template <> [[nodiscard]] _INLINE long long lexical_cast<long long>(const char* c);
+  template <> [[nodiscard]] _INLINE unsigned long long lexical_cast<unsigned long long>(const char* c);
+  template <> [[nodiscard]] _INLINE float lexical_cast<float>(const char* c);
+  template <> [[nodiscard]] _INLINE double lexical_cast<double>(const char* c);
+  template <> [[nodiscard]] _INLINE long double lexical_cast<long double>(const char* c);
+  template <> _INLINE tm lexical_cast<tm>(const char* c);
+#undef _INLINE
   template <typename T>
   T lexical_cast(const char* c) {
-	static_assert(std::is_convertible<std::string, T>::value,
-	  "Impossible to convert T from std::string. Please make your own lexical_cast() function");
-	throw std::invalid_argument("");
+	static_assert(std::is_convertible<std::string, T>::value, "Impossible to convert T from std::string.");
+	throw std::overflow_error("");
   }
-  template <typename T>
-  typename std::enable_if<std::is_fundamental<T>::value, std::string>::type lexical_cast(T&& t) {
-	return std::to_string(std::forward<T>(t));
-  };
   template <typename S, typename T>
   typename std::enable_if<std::is_fundamental<std::decay_t<T>>::value&&
 	std::is_same<S, std::string>::value, std::string>::type lexical_cast(T&& t) {
@@ -55,122 +55,119 @@ namespace std {
   }
   template <>
   signed char lexical_cast<signed char>(const char* c) {
-	signed char r; if (*c == '-') {
-	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	signed char r; if (*c != 0x2D) {
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = *c - 0x30;
 	  while (*++c) {
-		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
-	  };
-	} else {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = *c - 0x30;
-	  while (*++c) {
-		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  }
+	} else {
+	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument("");
+	  while (*++c) {
+		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
+	  };
 	} return r;
   }
   template <>
   unsigned char lexical_cast<unsigned char>(const char* c) {
-	if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); unsigned char r = *c - 0x30; char z = 0;
+	if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); unsigned char r = *c - 0x30; char z = 0;
 	while (z != 1 && *++c) {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = r * 10 + *c - 0x30; ++z;
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = r * 10 + *c - 0x30; ++z;
 	}
 	if (z == 1 && *++c) {
-	  if (r > 25 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	  if (r > 25 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  r = r * 10 + *c - 0x30;
-	  if (10 > r) throw std::runtime_error("");
+	  if (10 > r) throw std::out_of_range("");
 	} return r;
   }
   template <>
   short lexical_cast<short>(const char* c) {
-	short r; if (*c == '-') {
-	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	short r; if (*c != 0x2D) {
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = *c - 0x30;
 	  while (*++c) {
-		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
-	  };
-	} else {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = *c - 0x30;
-	  while (*++c) {
-		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  }
+	} else {
+	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument("");
+	  while (*++c) {
+		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
+	  };
 	} return r;
   }
   template <>
   unsigned short lexical_cast<unsigned short>(const char* c) {
-	if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); unsigned short r = *c - 0x30; char z = 0;
+	if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); unsigned short r = *c - 0x30; char z = 0;
 	while (z != 3 && *++c) {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = r * 10 + *c - 0x30; ++z;
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = r * 10 + *c - 0x30; ++z;
 	}
 	if (z == 3 && *++c) {
-	  if (r > 6553 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	  if (r > 6553 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  r = r * 10 + *c - 0x30;
-	  if (10 > r) throw std::runtime_error("");
+	  if (10 > r) throw std::out_of_range("");
 	} return r;
   }
   template <>
   int lexical_cast<int>(const char* c) {
-	int r; if (*c == '-') {
-	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	int r; if (*c != 0x2D) {
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = *c - 0x30;
 	  while (*++c) {
-		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
-	  };
-	} else {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = *c - 0x30;
-	  while (*++c) {
-		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  }
+	} else {
+	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument("");
+	  while (*++c) {
+		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
+	  };
 	} return r;
   }
   template <>
   unsigned int lexical_cast<unsigned int>(const char* c) {
-	if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); unsigned int r = *c - 0x30; char z = 0;
+	if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); unsigned int r = *c - 0x30; char z = 0;
 	while (z != 8 && *++c) {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = r * 10 + *c - 0x30; ++z;
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = r * 10 + *c - 0x30; ++z;
 	}
 	if (z == 8 && *++c) {
-	  if (r > 429496729 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	  if (r > 429496729 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  r = r * 10 + *c - 0x30;
-	  if (10 > r) throw std::runtime_error("");
+	  if (10 > r) throw std::out_of_range("");
 	} return r;
   }
   template <>
   long long lexical_cast<long long>(const char* c) {
-	long long r; if (*c == '-') {
-	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	long long r; if (*c != 0x2D) {
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = *c - 0x30;
 	  while (*++c) {
-		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
-	  };
-	} else {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = *c - 0x30;
-	  while (*++c) {
-		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+		r = r * 10 + *c - 0x30; if (r <= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  }
+	} else {
+	  r = 0x30 - *++c; if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument("");
+	  while (*++c) {
+		r = r * 10 - *c + 0x30; if (r >= 0 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
+	  };
 	} return r;
   }
   template <>
   unsigned long long lexical_cast<unsigned long long>(const char* c) {
-	if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); unsigned int r = *c - 0x30; char z = 0;
+	if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); unsigned long long r = *c - 0x30; char z = 0;
 	while (z != 18 && *++c) {
-	  if (*c > 0x39 || 0x30 > *c) throw std::runtime_error(""); r = r * 10 + *c - 0x30; ++z;
+	  if (*c > 0x39 || 0x30 > *c) throw std::invalid_argument(""); r = r * 10 + *c - 0x30; ++z;
 	}
 	if (z == 18 && *++c) {
-	  if (r > 1844674407370955161 || *c > 0x39 || 0x30 > *c) throw std::runtime_error("");
+	  if (r > 1844674407370955161 || *c > 0x39 || 0x30 > *c) throw std::range_error("");
 	  r = r * 10 + *c - 0x30;
-	  if (10 > r) throw std::runtime_error("");
+	  if (10 > r) throw std::out_of_range("");
 	} return r;
   }
   template <>
-  float lexical_cast<float>(const char* _Ptr) {
-	char* _Eptr; float _Ans = ::strtof(_Ptr, &_Eptr);
-	if (_Ptr == _Eptr) { throw std::runtime_error(""); } return _Ans;
+  float lexical_cast<float>(const char* c) {
+	char* $; const float _ = ::strtof(c, &$); if (*$ == 0) return _; throw std::invalid_argument("");
   }
   template <>
-  double lexical_cast<double>(const char* _Ptr) {
-	char* _Eptr; const double _Ans = ::strtod(_Ptr, &_Eptr);
-	if (_Ptr == _Eptr) { throw std::runtime_error(""); } return _Ans;
+  double lexical_cast<double>(const char* c) {
+	char* $; const double _ = ::strtod(c, &$); if (*$ == 0) return _; throw std::invalid_argument("");
   }
   template <>
-  long double lexical_cast<long double>(const char* _Ptr) {
-	char* _Eptr; const long double _Ans = ::strtold(_Ptr, &_Eptr);
-	if (_Ptr == _Eptr) { throw std::runtime_error(""); } return _Ans;
+  long double lexical_cast<long double>(const char* c) {
+	char* $; const long double _ = ::strtold(c, &$); if (*$ == 0) return _; throw std::invalid_argument("");
   }
   template <>
   tm lexical_cast<tm>(const char* c) {
